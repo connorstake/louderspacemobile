@@ -40,9 +40,14 @@ class RegistrationScreen extends StatelessWidget {
                 final password = _passwordController.text;
                 final email = _emailController.text;
                 final role = _roleController.text;
-                await Provider.of<AuthProvider>(context, listen: false)
-                    .register(username, password, email, role);
-                Navigator.pushReplacementNamed(context, '/home');
+                try {
+                  await Provider.of<AuthProvider>(context, listen: false).register(username, password, email, role);
+                  Navigator.pushReplacementNamed(context, '/home');
+                } catch (err) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Registration failed: ${err.toString()}'))
+                  );
+                }
               },
               child: Text('Register'),
             ),

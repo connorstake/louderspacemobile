@@ -1,81 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:louderspacemobile/models/station.dart';
-import 'package:louderspacemobile/providers/station_provider.dart';
+import '../providers/station_provider.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Fetch stations when the HomeScreen is initialized
+    Provider.of<StationProvider>(context, listen: false).fetchStations();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final stationProvider = Provider.of<StationProvider>(context);
-
     return Scaffold(
       appBar: AppBar(
-        title: Text('Stations'),
+        title: Text('Home'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: () {
+              Provider.of<StationProvider>(context, listen: false).fetchStations();
+            },
+          ),
+        ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: FutureBuilder<List<Station>>(
-          future: stationProvider.fetchStations(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return Center(child: Text('No stations found.'));
-            } else {
-              return GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 3 / 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
+      body: Consumer<StationProvider>(
+        builder: (context, stationProvider, child) {
+          if (stationProvider.loading) {
+            return Center(child: CircularProgressIndicator());
+          }
+          if (stationProvider.stations.isEmpty) {
+            return Center(child: Text('No stations available.'));
+          }
+          return ListView.builder(
+            itemCount: stationProvider.stations.length,
+            itemBuilder: (context, index) {
+              final station = stationProvider.stations[index];
+              return Card(
+                child: ListTile(
+                  title: Text(station.name),
+                  subtitle: Text(station.tags.join(', ')),
+                  onTap: () {
+                    // Navigate to station details or play songs
+                  },
                 ),
-                itemCount: snapshot.data!.length,
-                itemBuilder: (context, index) {
-                  final station = snapshot.data![index];
-                  return Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: InkWell(
-                      onTap: () {
-                        // Navigate to station detail or songs page
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              station.name,
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 4,
-                              children: station.tags
-                                  .map((tag) => Chip(
-                                label: Text(tag),
-                                backgroundColor: Colors.blueAccent.withOpacity(0.2),
-                              ))
-                                  .toList(),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                },
               );
-            }
-          },
-        ),
+            },
+          );
+        },
       ),
     );
   }
