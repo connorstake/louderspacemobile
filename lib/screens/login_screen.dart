@@ -30,7 +30,7 @@ class LoginScreen extends StatelessWidget {
                 final password = _passwordController.text;
                 try {
                   await Provider.of<AuthProvider>(context, listen: false).login(username, password);
-                  Navigator.pushReplacementNamed(context, '/home');
+                  Navigator.pushReplacementNamed(context, '/');
                 } catch (err) {
                   ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Login failed: ${err.toString()}'))
