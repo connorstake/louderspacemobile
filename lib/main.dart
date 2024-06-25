@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:louderspacemobile/providers/feedback_provider.dart';
+import 'package:louderspacemobile/services/feedback_service.dart';
 import 'package:provider/provider.dart';
 import 'client/api_client.dart';
 import 'providers/auth_provider.dart';
@@ -19,6 +21,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => StationProvider(StationService(apiClient))),
         ChangeNotifierProvider(create: (_) => SongProvider(SongService(apiClient))),
+        ChangeNotifierProvider(create: (_) => FeedbackProvider(FeedbackService(apiClient))),
       ],
       child: MyApp(),
     ),

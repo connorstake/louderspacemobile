@@ -16,11 +16,11 @@ class SongProvider with ChangeNotifier {
 
   String get currentSongUrl => 'https://cdn1.suno.ai/${currentSong?.sunoId}.mp3';
 
-  Future<void> fetchSongsForStation(int stationId) async {
+  Future<void> fetchSongsForStation(int stationId, int userId) async {
     _loading = true;
     notifyListeners();
     try {
-      _songs = await _songService.getSongsForStation(stationId);
+      _songs = await _songService.getSongsForStation(stationId, userId);
       _currentSongIndex = 0;
       notifyListeners();
     } catch (error) {

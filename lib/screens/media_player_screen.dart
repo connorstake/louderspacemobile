@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:audioplayers/audioplayers.dart';
+import '../providers/auth_provider.dart';
 import '../providers/song_provider.dart';
 
 class MediaPlayerScreen extends StatefulWidget {
@@ -47,12 +48,16 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
       _skipToNextSong();
     });
 
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final songProvider = Provider.of<SongProvider>(context, listen: false);
-    songProvider.fetchSongsForStation(widget.stationId).then((_) {
-      if (songProvider.currentSong != null) {
-        _playSong(songProvider.currentSongUrl);
-      }
-    });
+    if (authProvider.user != null) {
+      final userId = authProvider.user!.id;
+      songProvider.fetchSongsForStation(widget.stationId, userId).then((_) {
+        if (songProvider.currentSong != null) {
+          _playSong(songProvider.currentSongUrl);
+        }
+      });
+    }
   }
 
   @override
