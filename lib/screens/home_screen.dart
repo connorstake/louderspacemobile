@@ -3,7 +3,21 @@ import 'package:provider/provider.dart';
 import '../providers/station_provider.dart';
 import 'media_player_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Fetch stations when the screen loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<StationProvider>(context, listen: false).fetchStations();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,6 +37,9 @@ class HomeScreen extends StatelessWidget {
           final stations = stationProvider.stations;
           if (stationProvider.loading) {
             return Center(child: CircularProgressIndicator());
+          }
+          if (stations.isEmpty) {
+            return Center(child: Text('No stations available.'));
           }
           return ListView.builder(
             itemCount: stations.length,
