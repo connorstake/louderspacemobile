@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:provider/provider.dart';
-import 'package:louderspacemobile/models/song.dart';
-
+import 'package:audioplayers/audioplayers.dart';
 import '../providers/song_provider.dart';
 
 class MediaPlayerScreen extends StatefulWidget {
   final int stationId;
 
-  const MediaPlayerScreen({Key? key, required this.stationId}) : super(key: key);
+  MediaPlayerScreen({required this.stationId});
 
   @override
   _MediaPlayerScreenState createState() => _MediaPlayerScreenState();
@@ -16,14 +14,45 @@ class MediaPlayerScreen extends StatefulWidget {
 
 class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
   late AudioPlayer _audioPlayer;
-  int _currentSongIndex = 0;
+  Duration _currentPosition = Duration.zero;
+  Duration _songDuration = Duration.zero;
   bool _isPlaying = false;
 
   @override
   void initState() {
     super.initState();
     _audioPlayer = AudioPlayer();
-    _fetchSongsAndPlay();
+
+    _audioPlayer.onPlayerStateChanged.listen((PlayerState state) {
+      setState(() {
+        _isPlaying = state == PlayerState.PLAYING;
+      });
+    });
+
+    _audioPlayer.onDurationChanged.listen((duration) {
+      setState(() {
+        _songDuration = duration;
+      });
+      print('Duration changed: $duration');
+    });
+
+    _audioPlayer.onAudioPositionChanged.listen((position) {
+      setState(() {
+        _currentPosition = position;
+      });
+      print('Position changed: $position');
+    });
+
+    _audioPlayer.onPlayerCompletion.listen((event) {
+      _skipToNextSong();
+    });
+
+    final songProvider = Provider.of<SongProvider>(context, listen: false);
+    songProvider.fetchSongsForStation(widget.stationId).then((_) {
+      if (songProvider.currentSong != null) {
+        _playSong(songProvider.currentSongUrl);
+      }
+    });
   }
 
   @override
@@ -32,107 +61,127 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
     super.dispose();
   }
 
-  Future<void> _fetchSongsAndPlay() async {
-    await Provider.of<SongProvider>(context, listen: false).fetchSongsForStation(widget.stationId);
-    _playSong();
-  }
-
-  void _playSong() async {
-    final songProvider = Provider.of<SongProvider>(context, listen: false);
-    if (songProvider.songs.isNotEmpty && _currentSongIndex < songProvider.songs.length) {
-      Song currentSong = songProvider.songs[_currentSongIndex];
-      await _audioPlayer.setUrl('https://cdn1.suno.ai/${currentSong.sunoId}.mp3');
-      _audioPlayer.play();
+  Future<void> _playSong(String url) async {
+    print('Playing song: $url');
+    int result = await _audioPlayer.play(url);
+    if (result == 1) {
       setState(() {
         _isPlaying = true;
       });
-      _audioPlayer.playerStateStream.listen((state) {
-        if (state.processingState == ProcessingState.completed) {
-          _skipToNext();
-        }
-      });
-    }
-  }
-
-  void _togglePlayPause() {
-    if (_isPlaying) {
-      _audioPlayer.pause();
+      print('Song is playing');
     } else {
-      _audioPlayer.play();
+      print('Error playing song');
     }
-    setState(() {
-      _isPlaying = !_isPlaying;
-    });
   }
 
-  void _skipToNext() {
+  void _pauseSong() async {
+    int result = await _audioPlayer.pause();
+    if (result == 1) {
+      setState(() {
+        _isPlaying = false;
+      });
+      print('Song is paused');
+    } else {
+      print('Error pausing song');
+    }
+  }
+
+  void _resumeSong() async {
+    int result = await _audioPlayer.resume();
+    if (result == 1) {
+      setState(() {
+        _isPlaying = true;
+      });
+      print('Song is resumed');
+    } else {
+      print('Error resuming song');
+    }
+  }
+
+  void _skipToNextSong() {
     final songProvider = Provider.of<SongProvider>(context, listen: false);
-    if (_currentSongIndex < songProvider.songs.length - 1) {
-      setState(() {
-        _currentSongIndex++;
-      });
-      _playSong();
+    songProvider.playNextSong();
+    if (songProvider.currentSong != null) {
+      _playSong(songProvider.currentSongUrl);
     }
   }
 
-  void _skipToPrevious() {
-    if (_currentSongIndex > 0) {
-      setState(() {
-        _currentSongIndex--;
-      });
-      _playSong();
+  void _skipToPreviousSong() {
+    final songProvider = Provider.of<SongProvider>(context, listen: false);
+    songProvider.playPreviousSong();
+    if (songProvider.currentSong != null) {
+      _playSong(songProvider.currentSongUrl);
     }
+  }
+
+  void _onSeek(double value) {
+    final position = Duration(seconds: value.toInt());
+    _audioPlayer.seek(position);
   }
 
   @override
   Widget build(BuildContext context) {
-    final songProvider = Provider.of<SongProvider>(context);
-    if (songProvider.loading) {
-      return Scaffold(
-        appBar: AppBar(title: Text('Media Player')),
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
     return Scaffold(
-      appBar: AppBar(
-        title: Text(songProvider.songs.isNotEmpty
-            ? songProvider.songs[_currentSongIndex].title
-            : 'Media Player'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (songProvider.songs.isNotEmpty)
-              Column(
-                children: [
-                  Text(songProvider.songs[_currentSongIndex].artist,
-                      style: TextStyle(fontSize: 24)),
-                  Text(songProvider.songs[_currentSongIndex].title,
-                      style: TextStyle(fontSize: 20)),
-                ],
-              ),
-            SizedBox(height: 20),
-            Row(
+      appBar: AppBar(title: Text('Media Player')),
+      body: Consumer<SongProvider>(
+        builder: (context, songProvider, child) {
+          final currentSong = songProvider.currentSong;
+          if (currentSong == null) {
+            return Center(child: CircularProgressIndicator());
+          }
+          print('Current song URL: ${songProvider.currentSongUrl}');
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                IconButton(
-                  icon: Icon(Icons.skip_previous),
-                  onPressed: _skipToPrevious,
+                Text(
+                  currentSong.title,
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
-                IconButton(
-                  icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
-                  onPressed: _togglePlayPause,
+                Text(currentSong.artist),
+                SizedBox(height: 20),
+                Slider(
+                  value: _currentPosition.inSeconds.toDouble(),
+                  max: _songDuration.inSeconds.toDouble(),
+                  onChanged: _onSeek,
                 ),
-                IconButton(
-                  icon: Icon(Icons.skip_next),
-                  onPressed: _skipToNext,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(_formatDuration(_currentPosition)),
+                    Text(_formatDuration(_songDuration)),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.skip_previous),
+                      onPressed: _skipToPreviousSong,
+                    ),
+                    IconButton(
+                      icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
+                      onPressed: _isPlaying ? _pauseSong : _resumeSong,
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.skip_next),
+                      onPressed: _skipToNextSong,
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
+  }
+
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return '$minutes:$seconds';
   }
 }
