@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/station_provider.dart';
-import '../models/station.dart';
 import 'media_player_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -22,7 +21,7 @@ class HomeScreen extends StatelessWidget {
       body: Consumer<StationProvider>(
         builder: (context, stationProvider, child) {
           final stations = stationProvider.stations;
-          if (stations.isEmpty) {
+          if (stationProvider.loading) {
             return Center(child: CircularProgressIndicator());
           }
           return ListView.builder(
@@ -36,7 +35,9 @@ class HomeScreen extends StatelessWidget {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => MediaPlayerScreen(station: station)),
+                      MaterialPageRoute(
+                        builder: (context) => MediaPlayerScreen(stationId: station.id),
+                      ),
                     );
                   },
                 ),

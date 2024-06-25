@@ -1,130 +1,138 @@
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:provider/provider.dart';
-import 'package:audioplayers/audioplayers.dart';
-import '../models/station.dart';
-import '../models/song.dart';
-import '../services/song_service.dart';
+import 'package:louderspacemobile/models/song.dart';
+
+import '../providers/song_provider.dart';
 
 class MediaPlayerScreen extends StatefulWidget {
-  final Station station;
+  final int stationId;
 
-  MediaPlayerScreen({required this.station});
+  const MediaPlayerScreen({Key? key, required this.stationId}) : super(key: key);
 
   @override
   _MediaPlayerScreenState createState() => _MediaPlayerScreenState();
 }
 
 class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
-  AudioPlayer _audioPlayer = AudioPlayer();
-  List<Song> _songs = [];
-  Song? _currentSong;
+  late AudioPlayer _audioPlayer;
+  int _currentSongIndex = 0;
   bool _isPlaying = false;
 
   @override
   void initState() {
     super.initState();
-    _fetchSongs();
-  }
-
-  Future<void> _fetchSongs() async {
-    try {
-      final songs = await Provider.of<SongService>(context, listen: false).getSongsForStation(widget.station.id);
-      setState(() {
-        _songs = songs;
-        if (_songs.isNotEmpty) {
-          _currentSong = _songs[0];
-        }
-      });
-    } catch (e) {
-      print('Error fetching songs: $e');
-    }
-  }
-
-  void _playSong(Song song) async {
-    await _audioPlayer.play('https://cdn1.suno.ai/${song.sunoId}.mp3');
-    setState(() {
-      _currentSong = song;
-      _isPlaying = true;
-    });
-  }
-
-  void _pauseSong() async {
-    await _audioPlayer.pause();
-    setState(() {
-      _isPlaying = false;
-    });
-  }
-
-  void _skipSong() {
-    if (_songs.isNotEmpty) {
-      final currentIndex = _songs.indexOf(_currentSong!);
-      final nextIndex = (currentIndex + 1) % _songs.length;
-      _playSong(_songs[nextIndex]);
-    }
-  }
-
-  void _rewindSong() {
-    if (_songs.isNotEmpty) {
-      final currentIndex = _songs.indexOf(_currentSong!);
-      final previousIndex = (currentIndex - 1 + _songs.length) % _songs.length;
-      _playSong(_songs[previousIndex]);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.station.name),
-      ),
-      body: _currentSong == null
-          ? Center(child: CircularProgressIndicator())
-          : Column(
-        children: [
-          Text(
-            _currentSong!.title,
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          Text(_currentSong!.artist),
-          Spacer(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                icon: Icon(Icons.skip_previous),
-                onPressed: _rewindSong,
-              ),
-              IconButton(
-                icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
-                onPressed: _isPlaying ? _pauseSong : () => _playSong(_currentSong!),
-              ),
-              IconButton(
-                icon: Icon(Icons.skip_next),
-                onPressed: _skipSong,
-              ),
-            ],
-          ),
-          Spacer(),
-          ListView.builder(
-            shrinkWrap: true,
-            itemCount: _songs.length,
-            itemBuilder: (context, index) {
-              final song = _songs[index];
-              return ListTile(
-                title: Text(song.title),
-                subtitle: Text(song.artist),
-                onTap: () => _playSong(song),
-              );
-            },
-          ),
-        ],
-      ),
-    );
+    _audioPlayer = AudioPlayer();
+    _fetchSongsAndPlay();
   }
 
   @override
   void dispose() {
     _audioPlayer.dispose();
     super.dispose();
+  }
+
+  Future<void> _fetchSongsAndPlay() async {
+    await Provider.of<SongProvider>(context, listen: false).fetchSongsForStation(widget.stationId);
+    _playSong();
+  }
+
+  void _playSong() async {
+    final songProvider = Provider.of<SongProvider>(context, listen: false);
+    if (songProvider.songs.isNotEmpty && _currentSongIndex < songProvider.songs.length) {
+      Song currentSong = songProvider.songs[_currentSongIndex];
+      await _audioPlayer.setUrl('https://cdn1.suno.ai/${currentSong.sunoId}.mp3');
+      _audioPlayer.play();
+      setState(() {
+        _isPlaying = true;
+      });
+      _audioPlayer.playerStateStream.listen((state) {
+        if (state.processingState == ProcessingState.completed) {
+          _skipToNext();
+        }
+      });
+    }
+  }
+
+  void _togglePlayPause() {
+    if (_isPlaying) {
+      _audioPlayer.pause();
+    } else {
+      _audioPlayer.play();
+    }
+    setState(() {
+      _isPlaying = !_isPlaying;
+    });
+  }
+
+  void _skipToNext() {
+    final songProvider = Provider.of<SongProvider>(context, listen: false);
+    if (_currentSongIndex < songProvider.songs.length - 1) {
+      setState(() {
+        _currentSongIndex++;
+      });
+      _playSong();
+    }
+  }
+
+  void _skipToPrevious() {
+    if (_currentSongIndex > 0) {
+      setState(() {
+        _currentSongIndex--;
+      });
+      _playSong();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final songProvider = Provider.of<SongProvider>(context);
+    if (songProvider.loading) {
+      return Scaffold(
+        appBar: AppBar(title: Text('Media Player')),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(songProvider.songs.isNotEmpty
+            ? songProvider.songs[_currentSongIndex].title
+            : 'Media Player'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (songProvider.songs.isNotEmpty)
+              Column(
+                children: [
+                  Text(songProvider.songs[_currentSongIndex].artist,
+                      style: TextStyle(fontSize: 24)),
+                  Text(songProvider.songs[_currentSongIndex].title,
+                      style: TextStyle(fontSize: 20)),
+                ],
+              ),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.skip_previous),
+                  onPressed: _skipToPrevious,
+                ),
+                IconButton(
+                  icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
+                  onPressed: _togglePlayPause,
+                ),
+                IconButton(
+                  icon: Icon(Icons.skip_next),
+                  onPressed: _skipToNext,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
