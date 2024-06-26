@@ -9,8 +9,8 @@ class SongService {
 
   SongService(this._apiClient);
 
-  Future<List<Song>> getSongsForStation(int stationId) async {
-    final response = await _apiClient.get('/stations/$stationId/songs');
+  Future<List<Song>> getSongsForStation(int stationId, int userId) async {
+    final response = await _apiClient.get('/stations/$stationId/songs',  queryParameters: {'user_id': userId});
     final List<dynamic> data = jsonDecode(response.data) as List<dynamic>;
     print('decoded songs: $data');
     return data.map((song) => Song.fromJson(song as Map<String, dynamic>)).toList();

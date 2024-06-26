@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../providers/song_provider.dart';
+import '../providers/auth_provider.dart';
 
 class MediaPlayerScreen extends StatefulWidget {
   final int stationId;
@@ -47,12 +48,17 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
       _skipToNextSong();
     });
 
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final songProvider = Provider.of<SongProvider>(context, listen: false);
-    songProvider.fetchSongsForStation(widget.stationId).then((_) {
-      if (songProvider.currentSong != null) {
-        _playSong(songProvider.currentSongUrl);
-      }
-    });
+
+    if (authProvider.user != null) {
+      final userId = authProvider.user!.id;
+      songProvider.fetchSongsForStation(widget.stationId, userId).then((_) {
+        if (songProvider.currentSong != null) {
+          _playSong(songProvider.currentSongUrl);
+        }
+      });
+    }
   }
 
   @override
@@ -119,17 +125,22 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
     _audioPlayer.seek(position);
   }
 
+  void _toggleLike(SongProvider songProvider, AuthProvider authProvider) {
+    if (authProvider.user != null && songProvider.currentSong != null) {
+      Provider.of<SongProvider>(context, listen: false).toggleLikeSong(authProvider.user!.id, songProvider.currentSong!);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Media Player')),
-      body: Consumer<SongProvider>(
-        builder: (context, songProvider, child) {
+      body: Consumer2<AuthProvider, SongProvider>(
+        builder: (context, authProvider, songProvider, child) {
           final currentSong = songProvider.currentSong;
           if (currentSong == null) {
             return Center(child: CircularProgressIndicator());
           }
-          print('Current song URL: ${songProvider.currentSongUrl}');
           return Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -140,6 +151,13 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 Text(currentSong.artist),
+                IconButton(
+                  icon: Icon(
+                    currentSong.liked ? Icons.favorite : Icons.favorite_border,
+                    color: currentSong.liked ? Colors.red : Colors.grey,
+                  ),
+                  onPressed: () => _toggleLike(songProvider, authProvider),
+                ),
                 SizedBox(height: 20),
                 Slider(
                   value: _currentPosition.inSeconds.toDouble(),
