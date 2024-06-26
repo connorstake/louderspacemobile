@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import '../models/song.dart';
+import '../services/feedback_service.dart';
 import '../services/song_service.dart';
 
 class SongProvider with ChangeNotifier {
   final SongService _songService;
+  final FeedbackService _feedbackService;
   List<Song> _songs = [];
   int _currentSongIndex = 0;
   bool _loading = false;
 
-  SongProvider(this._songService);
+  SongProvider(this._songService, this._feedbackService);
 
   List<Song> get songs => _songs;
   Song? get currentSong => _songs.isNotEmpty ? _songs[_currentSongIndex] : null;
@@ -41,6 +43,21 @@ class SongProvider with ChangeNotifier {
     if (_songs.isNotEmpty) {
       _currentSongIndex = (_currentSongIndex - 1 + _songs.length) % _songs.length;
       notifyListeners();
+    }
+  }
+
+  Future<void> toggleLikeSong(int userId, Song song) async {
+    print('FeedbackService: ${_feedbackService}');
+    try {
+      if (song.liked) {
+        await _feedbackService.deleteFeedback(userId, song.id);
+      } else {
+        await _feedbackService.createFeedback(userId, song.id, true);
+      }
+      song.liked = !song.liked;
+      notifyListeners();
+    } catch (error) {
+      print('Error liking/unliking song: $error');
     }
   }
 }

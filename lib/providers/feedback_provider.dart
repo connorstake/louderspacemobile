@@ -12,6 +12,7 @@ class FeedbackProvider with ChangeNotifier {
   bool? get liked => _liked;
 
   Future<void> createFeedback(int userId, int songId, bool liked) async {
+    print('FeedbackProvider: Creating feedback for song: $songId liked: $liked for user: $userId');
     await _feedbackService.createFeedback(userId, songId, liked);
     _liked = liked;
     notifyListeners();

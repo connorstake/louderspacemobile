@@ -1,12 +1,10 @@
-import 'dart:ffi';
-
 class Song {
   final int id;
   final String title;
   final String artist;
   final String genre;
   final String sunoId;
-  final bool liked;
+  bool liked;
 
   Song({
     required this.id,
@@ -14,7 +12,7 @@ class Song {
     required this.artist,
     required this.genre,
     required this.sunoId,
-    required this.liked,
+    this.liked = false,
   });
 
   factory Song.fromJson(Map<String, dynamic> json) {

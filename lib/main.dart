@@ -6,7 +6,6 @@ import 'client/api_client.dart';
 import 'providers/auth_provider.dart';
 import 'providers/station_provider.dart';
 import 'providers/song_provider.dart';
-import 'services/auth_service.dart';
 import 'services/station_service.dart';
 import 'services/song_service.dart';
 import 'screens/home_screen.dart';
@@ -15,12 +14,14 @@ import 'screens/registration_screen.dart';
 
 void main() {
   final apiClient = ApiClient();
+  final feedbackService = FeedbackService(apiClient);
+  print('Feedback Service: $feedbackService');
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => StationProvider(StationService(apiClient))),
-        ChangeNotifierProvider(create: (_) => SongProvider(SongService(apiClient))),
+        ChangeNotifierProvider(create: (_) => SongProvider(SongService(apiClient), feedbackService)),
         ChangeNotifierProvider(create: (_) => FeedbackProvider(FeedbackService(apiClient))),
       ],
       child: MyApp(),
