@@ -8,6 +8,11 @@ class PersistentControls extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer2<MediaPlayerProvider, PomodoroProvider>(
       builder: (context, mediaPlayer, pomodoro, child) {
+        String currentRoute = ModalRoute.of(context)?.settings.name ?? '';
+        bool isMediaPlayerScreen = currentRoute == '/media_player';
+
+        if (isMediaPlayerScreen) return SizedBox.shrink();
+
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [

@@ -79,7 +79,9 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
                   children: [
                     IconButton(
                       icon: Icon(Icons.skip_previous),
-                      onPressed: mediaPlayerProvider.playPreviousSong,
+                      onPressed: () {
+                        songProvider.playPreviousSong();
+                      },
                     ),
                     IconButton(
                       icon: Icon(mediaPlayerProvider.isPlaying ? Icons.pause : Icons.play_arrow),
@@ -87,7 +89,9 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
                     ),
                     IconButton(
                       icon: Icon(Icons.skip_next),
-                      onPressed: mediaPlayerProvider.playNextSong,
+                      onPressed: () {
+                        songProvider.playNextSong();
+                      },
                     ),
                   ],
                 ),

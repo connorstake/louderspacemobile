@@ -18,14 +18,15 @@ import 'screens/registration_screen.dart';
 void main() {
   final apiClient = ApiClient();
   final feedbackService = FeedbackService(apiClient);
+  final mediaPlayerProvider = MediaPlayerProvider();
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => StationProvider(StationService(apiClient))),
-        ChangeNotifierProvider(create: (_) => SongProvider(SongService(apiClient), feedbackService)),
+        ChangeNotifierProvider(create: (_) => SongProvider(SongService(apiClient), feedbackService, mediaPlayerProvider )),
         ChangeNotifierProvider(create: (_) => FeedbackProvider(feedbackService)),
-        ChangeNotifierProvider(create: (_) => MediaPlayerProvider()),
+        ChangeNotifierProvider(create: (_) => mediaPlayerProvider),
         ChangeNotifierProvider(create: (_) => PomodoroProvider()),
       ],
       child: MyApp(),
@@ -60,21 +61,24 @@ class MyApp extends StatelessWidget {
 class MainAppStructure extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final songProvider = Provider.of<SongProvider>(context, listen: false);
+      final mediaPlayerProvider = Provider.of<MediaPlayerProvider>(context, listen: false);
+      mediaPlayerProvider.setSongProvider(songProvider);
+    });
+
     return Scaffold(
       body: Navigator(
-        initialRoute: '/home',
         onGenerateRoute: (settings) {
           Widget page;
           switch (settings.name) {
-            case '/home':
-              page = HomeScreen();
+            case '/login':
+              page = LoginScreen();
               break;
             case '/register':
               page = RegistrationScreen();
               break;
-            case '/login':
-              page = LoginScreen();
-              break;
+            case '/home':
             default:
               page = HomeScreen();
               break;

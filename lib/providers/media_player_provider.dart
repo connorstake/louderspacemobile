@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'song_provider.dart';
 
 class MediaPlayerProvider with ChangeNotifier {
   final AudioPlayer _audioPlayer = AudioPlayer();
@@ -8,7 +9,8 @@ class MediaPlayerProvider with ChangeNotifier {
   bool _isPlaying = false;
   String? _currentSongUrl;
   List<String> _playlist = [];
-  int _currentIndex = 0;
+  int _currentSongIndex = 0;
+  SongProvider? _songProvider;
 
   MediaPlayerProvider() {
     _audioPlayer.onPlayerStateChanged.listen((PlayerState state) {
@@ -35,12 +37,19 @@ class MediaPlayerProvider with ChangeNotifier {
   Duration get currentPosition => _currentPosition;
   Duration get songDuration => _songDuration;
   String? get currentSongUrl => _currentSongUrl;
+  List<String> get playlist => _playlist;
 
-  set playlist(List<String> songs) {
-    _playlist = songs;
-    _currentIndex = 0;
-    _currentSongUrl = _playlist.isNotEmpty ? _playlist[_currentIndex] : null;
+  set playlist(List<String> urls) {
+    _playlist = urls;
+    _currentSongIndex = 0;
+    if (_playlist.isNotEmpty) {
+      playSong(_playlist[_currentSongIndex]);
+    }
     notifyListeners();
+  }
+
+  void setSongProvider(SongProvider songProvider) {
+    _songProvider = songProvider;
   }
 
   Future<void> playSong(String url) async {
@@ -70,15 +79,17 @@ class MediaPlayerProvider with ChangeNotifier {
 
   void playNextSong() {
     if (_playlist.isNotEmpty) {
-      _currentIndex = (_currentIndex + 1) % _playlist.length;
-      playSong(_playlist[_currentIndex]);
+      _currentSongIndex = (_currentSongIndex + 1) % _playlist.length;
+      playSong(_playlist[_currentSongIndex]);
+      _songProvider?.playNextSong();
     }
   }
 
   void playPreviousSong() {
     if (_playlist.isNotEmpty) {
-      _currentIndex = (_currentIndex - 1 + _playlist.length) % _playlist.length;
-      playSong(_playlist[_currentIndex]);
+      _currentSongIndex = (_currentSongIndex - 1 + _playlist.length) % _playlist.length;
+      playSong(_playlist[_currentSongIndex]);
+      _songProvider?.playPreviousSong();
     }
   }
 

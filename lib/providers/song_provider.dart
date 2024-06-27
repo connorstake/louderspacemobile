@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/song.dart';
 import '../services/feedback_service.dart';
 import '../services/song_service.dart';
+import 'media_player_provider.dart';
 
 class SongProvider with ChangeNotifier {
   final SongService _songService;
@@ -9,8 +10,9 @@ class SongProvider with ChangeNotifier {
   List<Song> _songs = [];
   int _currentSongIndex = 0;
   bool _loading = false;
+  final MediaPlayerProvider _mediaPlayerProvider;
 
-  SongProvider(this._songService, this._feedbackService);
+  SongProvider(this._songService, this._feedbackService, this._mediaPlayerProvider);
 
   List<Song> get songs => _songs;
   Song? get currentSong => _songs.isNotEmpty ? _songs[_currentSongIndex] : null;
@@ -24,6 +26,7 @@ class SongProvider with ChangeNotifier {
     try {
       _songs = await _songService.getSongsForStation(stationId, userId);
       _currentSongIndex = 0;
+      _mediaPlayerProvider.playlist = _songs.map((song) => 'https://cdn1.suno.ai/${song.sunoId}.mp3').toList();
       notifyListeners();
     } catch (error) {
       print('Error fetching songs: $error');
@@ -35,6 +38,7 @@ class SongProvider with ChangeNotifier {
   void playNextSong() {
     if (_songs.isNotEmpty) {
       _currentSongIndex = (_currentSongIndex + 1) % _songs.length;
+      _mediaPlayerProvider.playSong(currentSongUrl);
       notifyListeners();
     }
   }
@@ -42,12 +46,12 @@ class SongProvider with ChangeNotifier {
   void playPreviousSong() {
     if (_songs.isNotEmpty) {
       _currentSongIndex = (_currentSongIndex - 1 + _songs.length) % _songs.length;
+      _mediaPlayerProvider.playSong(currentSongUrl);
       notifyListeners();
     }
   }
 
   Future<void> toggleLikeSong(int userId, Song song) async {
-    print('FeedbackService: ${_feedbackService}');
     try {
       if (song.liked) {
         await _feedbackService.deleteFeedback(userId, song.id);
