@@ -38,6 +38,7 @@ dependencies:
   audioplayers: ^0.20.1
   just_audio: ^0.8.0
   audio_service: ^0.18.0
+  rive: ^0.8.4
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -67,6 +68,10 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
+  assets:
+    - assets/
+    - assets/rive/
+    - assets/rive/test.riv
   # assets:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg

@@ -10,10 +10,7 @@ class PersistentControls extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer3<MediaPlayerProvider, PomodoroProvider, StationProvider>(
       builder: (context, mediaPlayer, pomodoro, stationProvider, child) {
-        String currentRoute = ModalRoute.of(context)?.settings.name ?? '';
-        bool isMediaPlayerScreen = currentRoute == '/media_player';
 
-        if (isMediaPlayerScreen) return SizedBox.shrink();
 
         final currentSongUrl = mediaPlayer.currentSongUrl;
         final currentStationId = mediaPlayer.stationId;
