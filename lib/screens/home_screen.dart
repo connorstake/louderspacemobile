@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rive/rive.dart';
 import '../providers/station_provider.dart';
 import 'media_player_screen.dart';
 
@@ -45,18 +46,39 @@ class _HomeScreenState extends State<HomeScreen> {
             itemCount: stations.length,
             itemBuilder: (context, index) {
               final station = stations[index];
+              final animationFile = index % 2 == 0
+                  ? 'assets/rive/stationbg.riv'
+                  : 'assets/rive/stationbg2.riv';
               return Card(
-                child: ListTile(
-                  title: Text(station.name),
-                  subtitle: Text(station.tags.join(', ')),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MediaPlayerScreen(stationId: station.id),
+                child: Stack(
+                  children: [
+                    // Rive animation as background
+                    Positioned.fill(
+                      child: RiveAnimation.asset(
+                        animationFile,
+                        fit: BoxFit.cover,
                       ),
-                    );
-                  },
+                    ),
+                    // Station information
+                    ListTile(
+                      title: Text(
+                        station.name,
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text(
+                        station.tags.join(', '),
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MediaPlayerScreen(stationId: station.id),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               );
             },
