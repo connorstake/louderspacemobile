@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class PomodoroProvider with ChangeNotifier {
   Timer? _timer;
-  Duration _remainingTime = Duration(minutes: 25); // Default Pomodoro duration
+  Duration _remainingTime = Duration(minutes: 1); // Default Pomodoro duration
   bool _isRunning = false;
 
   Duration get remainingTime => _remainingTime;
@@ -39,7 +39,7 @@ class PomodoroProvider with ChangeNotifier {
 
   void resetTimer() {
     _timer?.cancel();
-    _remainingTime = Duration(minutes: 25); // Reset to default duration
+    _remainingTime = Duration(minutes: 1); // Reset to default duration
     _isRunning = false;
     notifyListeners();
   }

@@ -11,6 +11,7 @@ class MediaPlayerProvider with ChangeNotifier {
   List<String> _playlist = [];
   int _currentSongIndex = 0;
   SongProvider? _songProvider;
+  int? _stationId;
 
   MediaPlayerProvider() {
     _audioPlayer.onPlayerStateChanged.listen((PlayerState state) {
@@ -38,6 +39,7 @@ class MediaPlayerProvider with ChangeNotifier {
   Duration get songDuration => _songDuration;
   String? get currentSongUrl => _currentSongUrl;
   List<String> get playlist => _playlist;
+  int? get stationId => _stationId;
 
   set playlist(List<String> urls) {
     _playlist = urls;
@@ -97,6 +99,18 @@ class MediaPlayerProvider with ChangeNotifier {
     final position = Duration(seconds: value.toInt());
     _audioPlayer.seek(position);
   }
+
+  void setStationId(int stationId) {
+    _stationId = stationId;
+    notifyListeners();
+  }
+
+  void dispose() {
+    _audioPlayer.stop();
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
 
   String formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');

@@ -27,6 +27,7 @@ class SongProvider with ChangeNotifier {
       _songs = await _songService.getSongsForStation(stationId, userId);
       _currentSongIndex = 0;
       _mediaPlayerProvider.playlist = _songs.map((song) => 'https://cdn1.suno.ai/${song.sunoId}.mp3').toList();
+      _mediaPlayerProvider.setStationId(stationId);
       notifyListeners();
     } catch (error) {
       print('Error fetching songs: $error');

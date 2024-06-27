@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:louderspacemobile/screens/media_player_screen.dart';
 import 'package:louderspacemobile/widgets/persistant_controls.dart';
 import 'package:provider/provider.dart';
 import 'client/api_client.dart';
@@ -79,6 +80,11 @@ class MainAppStructure extends StatelessWidget {
               page = RegistrationScreen();
               break;
             case '/home':
+              page = HomeScreen();
+              break;
+            case '/media_player':
+              page = MediaPlayerScreen(stationId: settings.arguments as int);
+              break;
             default:
               page = HomeScreen();
               break;

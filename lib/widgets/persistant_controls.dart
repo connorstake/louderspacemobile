@@ -1,24 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/station.dart';
 import '../providers/media_player_provider.dart';
 import '../providers/pomodoro_provider.dart';
+import '../providers/station_provider.dart';
 
 class PersistentControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Consumer2<MediaPlayerProvider, PomodoroProvider>(
-      builder: (context, mediaPlayer, pomodoro, child) {
+    return Consumer3<MediaPlayerProvider, PomodoroProvider, StationProvider>(
+      builder: (context, mediaPlayer, pomodoro, stationProvider, child) {
         String currentRoute = ModalRoute.of(context)?.settings.name ?? '';
         bool isMediaPlayerScreen = currentRoute == '/media_player';
 
         if (isMediaPlayerScreen) return SizedBox.shrink();
 
+        final currentSongUrl = mediaPlayer.currentSongUrl;
+        final currentStationId = mediaPlayer.stationId;
+        final currentStation = currentStationId != null
+            ? stationProvider.stations.firstWhere(
+              (station) => station.id == currentStationId,
+          orElse: () => Station(id: -1, name: 'Unknown', tags: []),
+        )
+            : null;
+
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (mediaPlayer.currentSongUrl != null)
+            if (currentSongUrl != null)
               ListTile(
-                title: Text(mediaPlayer.currentSongUrl!),
+                title: Text(currentStation?.name ?? 'Unknown Station'), // Update this line to show the song name instead of URL
                 subtitle: Text(mediaPlayer.isPlaying ? 'Playing' : 'Paused'),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
