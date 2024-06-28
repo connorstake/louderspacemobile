@@ -46,28 +46,28 @@ class PersistentControls extends StatelessWidget {
                   ],
                 ),
               ),
-            if (pomodoro.remainingTimeString.isNotEmpty)
-              ListTile(
-                title: Text('Pomodoro Timer'),
-                subtitle: Text(pomodoro.remainingTimeString),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.pause),
-                      onPressed: pomodoro.pauseTimer,
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.play_arrow),
-                      onPressed: pomodoro.startTimer,
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.stop),
-                      onPressed: pomodoro.resetTimer,
-                    ),
-                  ],
-                ),
-              ),
+            // if (pomodoro.remainingTimeString.isNotEmpty)
+            //   ListTile(
+            //     title: Text('Pomodoro Timer'),
+            //     subtitle: Text(pomodoro.remainingTimeString),
+            //     trailing: Row(
+            //       mainAxisSize: MainAxisSize.min,
+            //       children: [
+            //         IconButton(
+            //           icon: Icon(Icons.pause),
+            //           onPressed: pomodoro.pauseTimer,
+            //         ),
+            //         IconButton(
+            //           icon: Icon(Icons.play_arrow),
+            //           onPressed: pomodoro.startTimer,
+            //         ),
+            //         IconButton(
+            //           icon: Icon(Icons.stop),
+            //           onPressed: pomodoro.resetTimer,
+            //         ),
+            //       ],
+            //     ),
+            //   ),
           ],
         );
       },
