@@ -9,7 +9,6 @@ class PomodoroProvider with ChangeNotifier {
   bool _isRunning = false;
   final MediaPlayerProvider mediaPlayerProvider;
   final AudioPlayer _alarmPlayer = AudioPlayer();
-  bool _musicWasPlaying = false;
 
   PomodoroProvider(this.mediaPlayerProvider);
 
@@ -58,14 +57,8 @@ class PomodoroProvider with ChangeNotifier {
   }
 
   Future<void> _playAlarm() async {
-    if (mediaPlayerProvider.isPlaying) {
-      _musicWasPlaying = true;
-      await mediaPlayerProvider.pauseSong();
-    } else {
-      _musicWasPlaying = false;
-    }
-
-    int result = await _alarmPlayer.play('https://cdn.pixabay.com/download/audio/2022/06/12/audio_eb85589880.mp3?filename=oversimplified-alarm-clock-113180.mp3');
+    await mediaPlayerProvider.pauseSong(); // Pause the music
+    int result = await _alarmPlayer.play('https://cdn.pixabay.com/download/audio/2022/06/12/audio_eb85589880.mp3?filename=oversimplified-alarm-clock-113180.mp3', volume: 0.5);
     if (result == 1) {
       // success
       print("Alarm started playing successfully.");
@@ -77,7 +70,7 @@ class PomodoroProvider with ChangeNotifier {
 
   void stopAlarm() {
     _alarmPlayer.stop();
-    if (_musicWasPlaying) {
+    if (mediaPlayerProvider.isPlaying) {
       mediaPlayerProvider.resumeSong();
     }
   }

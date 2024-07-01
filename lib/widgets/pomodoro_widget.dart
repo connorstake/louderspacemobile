@@ -7,12 +7,6 @@ class PomodoroTimerWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<PomodoroProvider>(
       builder: (context, pomodoroProvider, child) {
-        if (pomodoroProvider.remainingTime == Duration.zero && pomodoroProvider.isRunning) {
-          // Show the alarm dialog when the timer reaches zero
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            pomodoroProvider.showAlarmDialog(context);
-          });
-        }
         return GestureDetector(
           onTap: () {
             if (pomodoroProvider.isRunning) {
@@ -30,7 +24,7 @@ class PomodoroTimerWidget extends StatelessWidget {
             ),
             child: Center(
               child: Text(
-                pomodoroProvider.remainingTimeString == '00:00' ? 'Start' : pomodoroProvider.remainingTimeString,
+                pomodoroProvider.remainingTimeString,
                 style: TextStyle(color: Colors.white, fontSize: 20),
               ),
             ),
@@ -72,14 +66,14 @@ class PomodoroTimerWidget extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Pomodoro Timer'),
-        content: Text('Timer is running. Would you like to pause or reset the timer?'),
+        content: Text('Timer is paused. Would you like to continue or reset the timer?'),
         actions: [
           TextButton(
             onPressed: () {
-              pomodoroProvider.pauseTimer();
+              pomodoroProvider.startTimer();
               Navigator.of(context).pop();
             },
-            child: Text('Pause'),
+            child: Text('Continue'),
           ),
           TextButton(
             onPressed: () {
