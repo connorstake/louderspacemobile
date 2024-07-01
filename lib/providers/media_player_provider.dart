@@ -105,6 +105,7 @@ class MediaPlayerProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  @override
   void dispose() {
     _audioPlayer.stop();
     _audioPlayer.dispose();

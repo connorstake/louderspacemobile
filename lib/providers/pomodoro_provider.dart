@@ -1,10 +1,17 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'media_player_provider.dart';
 
 class PomodoroProvider with ChangeNotifier {
   Timer? _timer;
-  Duration _remainingTime = Duration(minutes: 1); // Default Pomodoro duration
+  Duration _remainingTime = Duration(minutes: 25); // Default Pomodoro duration
   bool _isRunning = false;
+  final MediaPlayerProvider mediaPlayerProvider;
+  final AudioPlayer _alarmPlayer = AudioPlayer();
+  bool _musicWasPlaying = false;
+
+  PomodoroProvider(this.mediaPlayerProvider);
 
   Duration get remainingTime => _remainingTime;
   bool get isRunning => _isRunning;
@@ -14,6 +21,11 @@ class PomodoroProvider with ChangeNotifier {
     final minutes = twoDigits(_remainingTime.inMinutes.remainder(60));
     final seconds = twoDigits(_remainingTime.inSeconds.remainder(60));
     return '$minutes:$seconds';
+  }
+
+  void startTimerWithDuration(int minutes) {
+    _remainingTime = Duration(minutes: minutes);
+    startTimer();
   }
 
   void startTimer() {
@@ -27,6 +39,7 @@ class PomodoroProvider with ChangeNotifier {
         _timer?.cancel();
         _isRunning = false;
         notifyListeners();
+        _playAlarm();
       }
     });
   }
@@ -39,9 +52,58 @@ class PomodoroProvider with ChangeNotifier {
 
   void resetTimer() {
     _timer?.cancel();
-    _remainingTime = Duration(minutes: 1); // Reset to default duration
+    _remainingTime = Duration(minutes: 25); // Reset to default duration
     _isRunning = false;
     notifyListeners();
   }
-}
 
+  Future<void> _playAlarm() async {
+    if (mediaPlayerProvider.isPlaying) {
+      _musicWasPlaying = true;
+      await mediaPlayerProvider.pauseSong();
+    } else {
+      _musicWasPlaying = false;
+    }
+
+    int result = await _alarmPlayer.play('https://cdn.pixabay.com/download/audio/2022/06/12/audio_eb85589880.mp3?filename=oversimplified-alarm-clock-113180.mp3');
+    if (result == 1) {
+      // success
+      print("Alarm started playing successfully.");
+    } else {
+      // failure
+      print("Failed to play alarm.");
+    }
+  }
+
+  void stopAlarm() {
+    _alarmPlayer.stop();
+    if (_musicWasPlaying) {
+      mediaPlayerProvider.resumeSong();
+    }
+  }
+
+  void showAlarmDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Pomodoro Complete'),
+          content: Text('The Pomodoro session has ended.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                stopAlarm();
+                Navigator.of(context).pop();
+              },
+              child: Text('Stop Alarm'),
+            ),
+          ],
+        );
+      },
+    ).then((_) {
+      // Ensure the music does not resume if the dialog is dismissed
+      _alarmPlayer.stop();
+      mediaPlayerProvider.pauseSong();
+    });
+  }
+}
