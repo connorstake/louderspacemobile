@@ -37,7 +37,6 @@ dependencies:
   logger: ^1.0.0
   audioplayers: ^0.20.1
   just_audio: ^0.8.0
-  audio_service: ^0.18.0
   rive: ^0.8.4
 
 
