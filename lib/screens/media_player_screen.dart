@@ -40,7 +40,7 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text('Media Player'),
+        // title: Text('Media Player'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: IconThemeData(color: Colors.white),
@@ -86,6 +86,9 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
                       value: mediaPlayerProvider.currentPosition.inSeconds.toDouble(),
                       max: mediaPlayerProvider.songDuration.inSeconds.toDouble(),
                       onChanged: mediaPlayerProvider.seek,
+                      activeColor: Colors.black87,
+                      inactiveColor: Colors.white,
+                      thumbColor: Colors.white,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
