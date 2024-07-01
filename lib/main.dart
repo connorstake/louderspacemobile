@@ -69,30 +69,37 @@ class MainAppStructure extends StatelessWidget {
     });
 
     return Scaffold(
-      body: Navigator(
-        onGenerateRoute: (settings) {
-          Widget page;
-          switch (settings.name) {
-            case '/login':
-              page = LoginScreen();
-              break;
-            case '/register':
-              page = RegistrationScreen();
-              break;
-            case '/home':
-              page = HomeScreen();
-              break;
-            case '/media_player':
-              page = MediaPlayerScreen(stationId: settings.arguments as int);
-              break;
-            default:
-              page = HomeScreen();
-              break;
-          }
-          return MaterialPageRoute(builder: (context) => page);
-        },
+      body: Stack(
+        children: [
+          Navigator(
+            onGenerateRoute: (settings) {
+              Widget page;
+              switch (settings.name) {
+                case '/login':
+                  page = LoginScreen();
+                  break;
+                case '/register':
+                  page = RegistrationScreen();
+                  break;
+                case '/home':
+                  page = HomeScreen();
+                  break;
+                case '/media_player':
+                  page = MediaPlayerScreen(stationId: settings.arguments as int);
+                  break;
+                default:
+                  page = HomeScreen();
+                  break;
+              }
+              return MaterialPageRoute(builder: (context) => page);
+            },
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: PersistentControls(),
+          ),
+        ],
       ),
-      bottomNavigationBar: PersistentControls(),
     );
   }
 }
