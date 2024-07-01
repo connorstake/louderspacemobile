@@ -24,7 +24,7 @@ class PomodoroTimerWidget extends StatelessWidget {
             ),
             child: Center(
               child: Text(
-                pomodoroProvider.remainingTimeString,
+                pomodoroProvider.remainingTimeString == '00:00' ? 'Start' : pomodoroProvider.remainingTimeString,
                 style: TextStyle(color: Colors.white, fontSize: 20),
               ),
             ),
