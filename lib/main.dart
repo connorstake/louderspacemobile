@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:louderspacemobile/screens/media_player_screen.dart';
 import 'package:louderspacemobile/widgets/persistant_controls.dart';
+import 'package:louderspacemobile/widgets/pomodoro_widget.dart';
 import 'package:provider/provider.dart';
 import 'client/api_client.dart';
 import 'providers/auth_provider.dart';
@@ -17,18 +18,21 @@ import 'screens/login_screen.dart';
 import 'screens/registration_screen.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter binding is initialized
+
   final apiClient = ApiClient();
   final feedbackService = FeedbackService(apiClient);
   final mediaPlayerProvider = MediaPlayerProvider();
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => StationProvider(StationService(apiClient))),
-        ChangeNotifierProvider(create: (_) => SongProvider(SongService(apiClient), feedbackService, mediaPlayerProvider )),
+        ChangeNotifierProvider(create: (_) => SongProvider(SongService(apiClient), feedbackService, mediaPlayerProvider)),
         ChangeNotifierProvider(create: (_) => FeedbackProvider(feedbackService)),
         ChangeNotifierProvider(create: (_) => mediaPlayerProvider),
-        ChangeNotifierProvider(create: (_) => PomodoroProvider()),
+        ChangeNotifierProvider(create: (_) => PomodoroProvider(mediaPlayerProvider)), // Pass the mediaPlayerProvider here
       ],
       child: MyApp(),
     ),
@@ -59,15 +63,31 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MainAppStructure extends StatelessWidget {
+class MainAppStructure extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
+  _MainAppStructureState createState() => _MainAppStructureState();
+}
+
+class _MainAppStructureState extends State<MainAppStructure> {
+  @override
+  void initState() {
+    super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final songProvider = Provider.of<SongProvider>(context, listen: false);
       final mediaPlayerProvider = Provider.of<MediaPlayerProvider>(context, listen: false);
       mediaPlayerProvider.setSongProvider(songProvider);
     });
+  }
 
+  @override
+  void dispose() {
+    final mediaPlayerProvider = Provider.of<MediaPlayerProvider>(context, listen: false);
+    mediaPlayerProvider.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
@@ -97,6 +117,13 @@ class MainAppStructure extends StatelessWidget {
           Align(
             alignment: Alignment.bottomCenter,
             child: PersistentControls(),
+          ),
+          Align(
+            alignment: Alignment.topRight,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: PomodoroTimerWidget(),
+            ),
           ),
         ],
       ),
