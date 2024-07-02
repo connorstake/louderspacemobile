@@ -105,7 +105,7 @@ class _MainAppStructureState extends State<MainAppStructure> {
                   page = HomeScreen();
                   break;
                 case '/media_player':
-                  page = MediaPlayerScreen(stationId: settings.arguments as int);
+                  page = MediaPlayerScreen(stationId: settings.arguments as int, animationFilePath: '',);
                   break;
                 default:
                   page = HomeScreen();

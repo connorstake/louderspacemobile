@@ -5,7 +5,7 @@ import 'media_player_provider.dart';
 
 class PomodoroProvider with ChangeNotifier {
   Timer? _timer;
-  Duration _remainingTime = Duration(minutes: 25); // Default Pomodoro duration
+  Duration _remainingTime = Duration(minutes: 0); // Default Pomodoro duration
   bool _isRunning = false;
   final MediaPlayerProvider mediaPlayerProvider;
   final AudioPlayer _alarmPlayer = AudioPlayer();

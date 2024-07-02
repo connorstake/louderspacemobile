@@ -7,8 +7,9 @@ import '../providers/media_player_provider.dart';
 
 class MediaPlayerScreen extends StatefulWidget {
   final int stationId;
+  final String animationFilePath;
 
-  MediaPlayerScreen({required this.stationId});
+  MediaPlayerScreen({required this.stationId, required this.animationFilePath});
 
   @override
   _MediaPlayerScreenState createState() => _MediaPlayerScreenState();
@@ -21,15 +22,10 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final songProvider = Provider.of<SongProvider>(context, listen: false);
-    final mediaPlayerProvider = Provider.of<MediaPlayerProvider>(context, listen: false);
 
     if (authProvider.user != null) {
       final userId = authProvider.user!.id;
-      songProvider.fetchSongsForStation(widget.stationId, userId).then((_) {
-        if (songProvider.currentSong != null) {
-          mediaPlayerProvider.playSong(songProvider.currentSongUrl);
-        }
-      });
+      songProvider.fetchSongsForStation(widget.stationId, userId);
     }
   }
 
@@ -40,7 +36,6 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        // title: Text('Media Player'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: IconThemeData(color: Colors.white),
@@ -48,9 +43,9 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
       body: Stack(
         children: [
           // Rive animation background
-          const Positioned.fill(
+          Positioned.fill(
             child: RiveAnimation.asset(
-              'assets/rive/anime_music8.riv',
+              widget.animationFilePath,
               fit: BoxFit.cover,
             ),
           ),

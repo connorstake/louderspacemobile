@@ -21,6 +21,10 @@ class SongProvider with ChangeNotifier {
   String get currentSongUrl => 'https://cdn1.suno.ai/${currentSong?.sunoId}.mp3';
 
   Future<void> fetchSongsForStation(int stationId, int userId) async {
+    if (_mediaPlayerProvider.stationId == stationId) {
+      return; // Do nothing if the same station is already playing
+    }
+
     _loading = true;
     notifyListeners();
     try {
