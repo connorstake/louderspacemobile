@@ -66,14 +66,14 @@ class PomodoroTimerWidget extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Pomodoro Timer'),
-        content: Text('Timer is paused. Would you like to continue or reset the timer?'),
+        content: Text('Timer is running. Would you like to pause or reset the timer?'),
         actions: [
           TextButton(
             onPressed: () {
-              pomodoroProvider.startTimer();
+              pomodoroProvider.pauseTimer();
               Navigator.of(context).pop();
             },
-            child: Text('Continue'),
+            child: Text('Pause'),
           ),
           TextButton(
             onPressed: () {
