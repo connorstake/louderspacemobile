@@ -20,8 +20,8 @@ class PomodoroTimerWidget extends StatelessWidget {
             // Floating Pomodoro control
             Positioned(
               top: 50, // Adjust the position as needed
-              left: 20,
-              right: 20,
+              left: 40,
+              right: 40,
               child: GestureDetector(
                 onTap: () {
                   if (pomodoroProvider.isRunning) {

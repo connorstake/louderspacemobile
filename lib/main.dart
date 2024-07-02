@@ -80,13 +80,6 @@ class _MainAppStructureState extends State<MainAppStructure> {
   }
 
   @override
-  void dispose() {
-    final mediaPlayerProvider = Provider.of<MediaPlayerProvider>(context, listen: false);
-    mediaPlayerProvider.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
@@ -105,7 +98,7 @@ class _MainAppStructureState extends State<MainAppStructure> {
                   page = HomeScreen();
                   break;
                 case '/media_player':
-                  page = MediaPlayerScreen(stationId: settings.arguments as int, animationFilePath: '',);
+                  page = MediaPlayerScreen(stationId: settings.arguments as int, animationFilePath: '');
                   break;
                 default:
                   page = HomeScreen();
