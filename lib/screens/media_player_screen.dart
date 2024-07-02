@@ -22,15 +22,10 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final songProvider = Provider.of<SongProvider>(context, listen: false);
-    final mediaPlayerProvider = Provider.of<MediaPlayerProvider>(context, listen: false);
 
     if (authProvider.user != null) {
       final userId = authProvider.user!.id;
-      songProvider.fetchSongsForStation(widget.stationId, userId).then((_) {
-        if (songProvider.currentSong != null) {
-          mediaPlayerProvider.playSong(songProvider.currentSongUrl);
-        }
-      });
+      songProvider.fetchSongsForStation(widget.stationId, userId);
     }
   }
 

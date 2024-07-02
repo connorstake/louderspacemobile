@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rive/rive.dart';
 import '../providers/station_provider.dart';
+import '../providers/media_player_provider.dart';
 import 'media_player_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -24,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text('Stations', style: TextStyle(color: Colors.white)),
+        // title: Text('Stations', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.transparent,
         actions: [
           IconButton(
@@ -40,13 +41,13 @@ class _HomeScreenState extends State<HomeScreen> {
           // Rive animation background
           Positioned.fill(
             child: RiveAnimation.asset(
-              'assets/rive/bgaura.riv',
+              'assets/rive/treesv2.riv',
               fit: BoxFit.cover,
             ),
           ),
           // Foreground content
-          Consumer<StationProvider>(
-            builder: (context, stationProvider, child) {
+          Consumer2<StationProvider, MediaPlayerProvider>(
+            builder: (context, stationProvider, mediaPlayerProvider, child) {
               final stations = stationProvider.stations;
               if (stationProvider.loading) {
                 return Center(child: CircularProgressIndicator());
@@ -68,8 +69,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemBuilder: (context, index) {
                     final station = stations[index];
                     final animationFile = index % 2 == 0
-                        ? 'assets/rive/libraryv3.riv'
+                        ? 'assets/rive/library.riv'
                         : 'assets/rive/anime_music8.riv';
+                    final isPlayingStation = mediaPlayerProvider.isPlayingStation(station.id);
+
                     return GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -132,6 +135,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                         fontSize: 14,
                                       ),
                                     ),
+                                    if (isPlayingStation)
+                                      Icon(
+                                        Icons.play_arrow,
+                                        color: Colors.white,
+                                      ),
                                   ],
                                 ),
                               ),

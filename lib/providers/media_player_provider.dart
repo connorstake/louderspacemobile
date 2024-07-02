@@ -101,8 +101,14 @@ class MediaPlayerProvider with ChangeNotifier {
   }
 
   void setStationId(int stationId) {
-    _stationId = stationId;
-    notifyListeners();
+    if (_stationId != stationId) {
+      _stationId = stationId;
+      notifyListeners();
+    }
+  }
+
+  bool isPlayingStation(int stationId) {
+    return _stationId == stationId;
   }
 
   @override
@@ -111,7 +117,6 @@ class MediaPlayerProvider with ChangeNotifier {
     _audioPlayer.dispose();
     super.dispose();
   }
-
 
   String formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');

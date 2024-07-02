@@ -15,7 +15,7 @@ class LoginScreen extends StatelessWidget {
           // Rive animation covering the whole screen
           Positioned.fill(
             child: RiveAnimation.asset(
-              'assets/rive/test.riv',
+              'assets/rive/treesv2.riv',
               fit: BoxFit.cover,
             ),
           ),
