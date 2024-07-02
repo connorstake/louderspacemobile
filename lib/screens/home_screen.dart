@@ -24,22 +24,22 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        // title: Text('Stations', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.transparent,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.refresh),
-            onPressed: () {
-              Provider.of<StationProvider>(context, listen: false).fetchStations();
-            },
-          ),
-        ],
-      ),
+      // appBar: AppBar(
+      //   // title: Text('Stations', style: TextStyle(color: Colors.white)),
+      //   backgroundColor: Colors.transparent,
+      //   actions: [
+      //     IconButton(
+      //       icon: Icon(Icons.refresh),
+      //       onPressed: () {
+      //         Provider.of<StationProvider>(context, listen: false).fetchStations();
+      //       },
+      //     ),
+      //   ],
+      // ),
       body: Stack(
         children: [
           // Rive animation background
-          Positioned.fill(
+          const Positioned.fill(
             child: RiveAnimation.asset(
               'assets/rive/treesv2.riv',
               fit: BoxFit.cover,
@@ -50,16 +50,16 @@ class _HomeScreenState extends State<HomeScreen> {
             builder: (context, stationProvider, mediaPlayerProvider, child) {
               final stations = stationProvider.stations;
               if (stationProvider.loading) {
-                return Center(child: CircularProgressIndicator());
+                return const Center(child: CircularProgressIndicator());
               }
               if (stations.isEmpty) {
-                return Center(child: Text('No stations available.'));
+                return const Center(child: Text('No stations available.'));
               }
               return Padding(
-                padding: const EdgeInsets.only(top: 100.0), // Adjust padding as needed
+                padding: const EdgeInsets.only(top: 150.0), // Adjust padding as needed
                 child: GridView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2, // 2 items per row
                     crossAxisSpacing: 8.0,
                     mainAxisSpacing: 8.0,

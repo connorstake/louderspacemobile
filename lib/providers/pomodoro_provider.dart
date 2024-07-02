@@ -7,6 +7,7 @@ class PomodoroProvider with ChangeNotifier {
   Timer? _timer;
   Duration _remainingTime = Duration(minutes: 0); // Default Pomodoro duration
   bool _isRunning = false;
+  bool _isPaused = false; // Track if the timer is paused
   final MediaPlayerProvider mediaPlayerProvider;
   final AudioPlayer _alarmPlayer = AudioPlayer();
 
@@ -14,6 +15,7 @@ class PomodoroProvider with ChangeNotifier {
 
   Duration get remainingTime => _remainingTime;
   bool get isRunning => _isRunning;
+  bool get isPaused => _isPaused; // Expose paused state
 
   String get remainingTimeString {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
@@ -30,6 +32,7 @@ class PomodoroProvider with ChangeNotifier {
   void startTimer() {
     if (_isRunning) return;
     _isRunning = true;
+    _isPaused = false; // Reset paused state when starting a new timer
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (_remainingTime.inSeconds > 0) {
         _remainingTime -= Duration(seconds: 1);
@@ -46,13 +49,21 @@ class PomodoroProvider with ChangeNotifier {
   void pauseTimer() {
     _timer?.cancel();
     _isRunning = false;
+    _isPaused = true; // Set paused state when pausing the timer
     notifyListeners();
+  }
+
+  void resumeTimer() {
+    if (_isPaused) {
+      startTimer();
+    }
   }
 
   void resetTimer() {
     _timer?.cancel();
     _remainingTime = Duration(minutes: 25); // Reset to default duration
     _isRunning = false;
+    _isPaused = false; // Reset paused state
     notifyListeners();
   }
 

@@ -7,28 +7,62 @@ class PomodoroTimerWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<PomodoroProvider>(
       builder: (context, pomodoroProvider, child) {
-        return GestureDetector(
-          onTap: () {
-            if (pomodoroProvider.isRunning) {
-              _showPauseDialog(context, pomodoroProvider);
-            } else {
-              _showDurationPicker(context, pomodoroProvider);
-            }
-          },
-          child: Container(
-            height: 100,
-            width: 100,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.black.withOpacity(0.8),
-            ),
-            child: Center(
-              child: Text(
-                pomodoroProvider.remainingTimeString == '00:00' ? 'Start' : pomodoroProvider.remainingTimeString,
-                style: TextStyle(color: Colors.white, fontSize: 20),
+        return Stack(
+          children: [
+            // Your main content goes here
+            IgnorePointer(
+              ignoring: true, // Ignore touch events for the underlying Scaffold
+              child: Scaffold(
+                backgroundColor: Colors.transparent,
+                body: Container(), // An empty container to maintain the structure
               ),
             ),
-          ),
+            // Floating Pomodoro control
+            Positioned(
+              top: 50, // Adjust the position as needed
+              left: 20,
+              right: 20,
+              child: GestureDetector(
+                onTap: () {
+                  if (pomodoroProvider.isRunning) {
+                    _showPauseDialog(context, pomodoroProvider);
+                  } else if (pomodoroProvider.isPaused) {
+                    _showResumeDialog(context, pomodoroProvider); // Show resume dialog if paused
+                  } else {
+                    _showDurationPicker(context, pomodoroProvider);
+                  }
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    color: Colors.black.withOpacity(0.8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 10,
+                        offset: Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Pomodoro Timer',
+                        style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        pomodoroProvider.remainingTimeString == '00:00' ? 'Start' : pomodoroProvider.remainingTimeString,
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         );
       },
     );
@@ -74,6 +108,32 @@ class PomodoroTimerWidget extends StatelessWidget {
               Navigator.of(context).pop();
             },
             child: Text('Pause'),
+          ),
+          TextButton(
+            onPressed: () {
+              pomodoroProvider.resetTimer();
+              Navigator.of(context).pop();
+            },
+            child: Text('Reset'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showResumeDialog(BuildContext context, PomodoroProvider pomodoroProvider) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Pomodoro Timer'),
+        content: Text('Timer is paused. Would you like to continue or reset the timer?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              pomodoroProvider.resumeTimer();
+              Navigator.of(context).pop();
+            },
+            child: Text('Continue'),
           ),
           TextButton(
             onPressed: () {
