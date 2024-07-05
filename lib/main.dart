@@ -44,7 +44,23 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Louderspace',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      theme: ThemeData(primarySwatch: Colors.blue,
+        fontFamily: 'BeVietnamPro', // Use the Be Vietnam Pro font
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(fontFamily: 'BeVietnamPro'),
+          bodyMedium: TextStyle(fontFamily: 'BeVietnamPro'),
+          displayLarge: TextStyle(fontFamily: 'BeVietnamPro'),
+          displayMedium: TextStyle(fontFamily: 'BeVietnamPro'),
+          displaySmall: TextStyle(fontFamily: 'BeVietnamPro'),
+          headlineMedium: TextStyle(fontFamily: 'BeVietnamPro'),
+          headlineSmall: TextStyle(fontFamily: 'BeVietnamPro'),
+          titleLarge: TextStyle(fontFamily: 'BeVietnamPro'),
+          titleMedium: TextStyle(fontFamily: 'BeVietnamPro'),
+          titleSmall: TextStyle(fontFamily: 'BeVietnamPro'),
+          bodySmall: TextStyle(fontFamily: 'BeVietnamPro'),
+          labelLarge: TextStyle(fontFamily: 'BeVietnamPro'),
+          labelSmall: TextStyle(fontFamily: 'BeVietnamPro'),
+        ),),
       home: Consumer<AuthProvider>(
         builder: (context, authProvider, child) {
           if (authProvider.isAuthenticated) {
