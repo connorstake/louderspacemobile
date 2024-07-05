@@ -3,13 +3,15 @@ import 'package:provider/provider.dart';
 import '../models/station.dart';
 import '../providers/media_player_provider.dart';
 import '../providers/pomodoro_provider.dart';
+import '../providers/song_provider.dart';
 import '../providers/station_provider.dart';
+import '../providers/auth_provider.dart';
 
 class PersistentControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Consumer3<MediaPlayerProvider, PomodoroProvider, StationProvider>(
-      builder: (context, mediaPlayer, pomodoro, stationProvider, child) {
+    return Consumer4<MediaPlayerProvider, PomodoroProvider, StationProvider, SongProvider>(
+      builder: (context, mediaPlayer, pomodoro, stationProvider, songProvider, child) {
         final currentSongUrl = mediaPlayer.currentSongUrl;
         final currentStationId = mediaPlayer.stationId;
         final currentStation = currentStationId != null
@@ -18,6 +20,7 @@ class PersistentControls extends StatelessWidget {
           orElse: () => Station(id: -1, name: 'Unknown', tags: []),
         )
             : null;
+        final currentSong = songProvider.currentSong;
 
         return Padding(
           padding: const EdgeInsets.all(16.0),
@@ -38,13 +41,38 @@ class PersistentControls extends StatelessWidget {
                     ],
                   ),
                   child: ListTile(
+                    leading: currentSong != null
+                        ? IconButton(
+                      icon: currentSong.liked
+                          ? ShaderMask(
+                        shaderCallback: (Rect bounds) {
+                          return LinearGradient(
+                            colors: [Colors.red, Colors.orange],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ).createShader(bounds);
+                        },
+                        child: Icon(
+                          Icons.local_fire_department,
+                          color: Colors.white,
+                        ),
+                      )
+                          : Icon(
+                        Icons.local_fire_department,
+                        color: Colors.white,
+                      ),
+                      onPressed: () => songProvider.toggleLikeSong(
+                          Provider.of<AuthProvider>(context, listen: false).user!.id, currentSong),
+                    )
+                        : null,
                     title: Text(
-                      currentStation?.name ?? 'Unknown Station',
-                      style: TextStyle(color: Colors.white),
+                    songProvider.currentSong != null ? songProvider.currentSong!.title : 'Unknown Song',
+                      // currentStation?.name ?? 'Unknown Station',
+                      style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text(
                       mediaPlayer.isPlaying ? 'Playing' : 'Paused',
-                      style: TextStyle(color: Colors.white70),
+                      style: TextStyle(color: Colors.white70, fontSize: 12),
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
