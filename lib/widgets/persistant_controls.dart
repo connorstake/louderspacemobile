@@ -70,12 +70,12 @@ class PersistentControls extends StatelessWidget {
                         )
                             : null,
                         title: Text(
-                          currentStation?.name ?? 'Unknown Station',
-                          style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                          currentSong != null ? currentSong.title : 'Unknown',
+                          style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
                         ),
                         subtitle: Text(
-                          mediaPlayer.isPlaying ? 'Playing' : 'Paused',
-                          style: TextStyle(color: Colors.white70, fontSize: 16),
+                          mediaPlayer.isPlaying ? '${currentStation?.name}'  : '${currentStation?.name}',
+                          style: TextStyle(color: Colors.white70, fontSize: 13),
                         ),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -101,7 +101,7 @@ class PersistentControls extends StatelessWidget {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 6.0),
                         child: Slider(
                           value: mediaPlayer.currentPosition.inSeconds.toDouble(),
                           max: mediaPlayer.songDuration.inSeconds.toDouble(),
