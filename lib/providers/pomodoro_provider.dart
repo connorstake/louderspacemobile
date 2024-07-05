@@ -5,17 +5,19 @@ import 'media_player_provider.dart';
 
 class PomodoroProvider with ChangeNotifier {
   Timer? _timer;
-  Duration _remainingTime = Duration(minutes: 0); // Default Pomodoro duration
+  Duration _duration = Duration(minutes: 25); // Default Pomodoro duration
+  Duration _remainingTime = Duration(minutes: 25);
   bool _isRunning = false;
-  bool _isPaused = false; // Track if the timer is paused
+  bool _isPaused = false;
   final MediaPlayerProvider mediaPlayerProvider;
   final AudioPlayer _alarmPlayer = AudioPlayer();
 
   PomodoroProvider(this.mediaPlayerProvider);
 
+  Duration get duration => _duration;
   Duration get remainingTime => _remainingTime;
   bool get isRunning => _isRunning;
-  bool get isPaused => _isPaused; // Expose paused state
+  bool get isPaused => _isPaused;
 
   String get remainingTimeString {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
@@ -24,15 +26,17 @@ class PomodoroProvider with ChangeNotifier {
     return '$minutes:$seconds';
   }
 
-  void startTimerWithDuration(int minutes) {
-    _remainingTime = Duration(minutes: minutes);
-    startTimer();
+  void setDuration(Duration duration) {
+    pauseTimer();
+    _duration = duration;
+    _remainingTime = duration;
+    notifyListeners();
   }
 
   void startTimer() {
     if (_isRunning) return;
     _isRunning = true;
-    _isPaused = false; // Reset paused state when starting a new timer
+    _isPaused = false;
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (_remainingTime.inSeconds > 0) {
         _remainingTime -= Duration(seconds: 1);
@@ -40,6 +44,7 @@ class PomodoroProvider with ChangeNotifier {
       } else {
         _timer?.cancel();
         _isRunning = false;
+        _isPaused = false;
         notifyListeners();
         _playAlarm();
       }
@@ -49,7 +54,15 @@ class PomodoroProvider with ChangeNotifier {
   void pauseTimer() {
     _timer?.cancel();
     _isRunning = false;
-    _isPaused = true; // Set paused state when pausing the timer
+    _isPaused = true;
+    notifyListeners();
+  }
+
+  void resetTimer() {
+    _timer?.cancel();
+    _remainingTime = _duration; // Reset to default duration
+    _isRunning = false;
+    _isPaused = false;
     notifyListeners();
   }
 
@@ -57,14 +70,6 @@ class PomodoroProvider with ChangeNotifier {
     if (_isPaused) {
       startTimer();
     }
-  }
-
-  void resetTimer() {
-    _timer?.cancel();
-    _remainingTime = Duration(minutes: 25); // Reset to default duration
-    _isRunning = false;
-    _isPaused = false; // Reset paused state
-    notifyListeners();
   }
 
   Future<void> _playAlarm() async {

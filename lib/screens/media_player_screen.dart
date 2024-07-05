@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:rive/rive.dart';
 import '../providers/song_provider.dart';
 import '../providers/auth_provider.dart';
-import '../providers/media_player_provider.dart';
 
 class MediaPlayerScreen extends StatefulWidget {
   final int stationId;
@@ -31,7 +30,6 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final mediaPlayerProvider = Provider.of<MediaPlayerProvider>(context);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -47,6 +45,23 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
             child: RiveAnimation.asset(
               widget.animationFilePath,
               fit: BoxFit.cover,
+            ),
+          ),
+          Positioned(
+            top: 150,
+            left: 20,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.7),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.arrow_back, color: Colors.white),
+              ),
             ),
           ),
           // MediaPlayer content

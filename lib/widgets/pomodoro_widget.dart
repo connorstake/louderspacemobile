@@ -20,45 +20,56 @@ class PomodoroTimerWidget extends StatelessWidget {
             // Floating Pomodoro control
             Positioned(
               top: 50, // Adjust the position as needed
-              left: 40,
-              right: 40,
-              child: GestureDetector(
-                onTap: () {
-                  if (pomodoroProvider.isRunning) {
-                    _showPauseDialog(context, pomodoroProvider);
-                  } else if (pomodoroProvider.isPaused) {
-                    _showResumeDialog(context, pomodoroProvider); // Show resume dialog if paused
-                  } else {
-                    _showDurationPicker(context, pomodoroProvider);
-                  }
-                },
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: Colors.black.withOpacity(0.8),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 10,
-                        offset: Offset(0, 5),
+              left: 2,
+              right: 2,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.black.withOpacity(0.7),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 10,
+                      offset: Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Row(
+                      children: [
+                        _durationButton(context, pomodoroProvider, 5),
+                        SizedBox(width: 5),
+                        _durationButton(context, pomodoroProvider, 10),
+                        SizedBox(width: 5),
+                        _durationButton(context, pomodoroProvider, 25),
+                      ],
+                    ),
+                    Spacer(),
+                    IconButton(
+                      icon: Icon(
+                        pomodoroProvider.isRunning ? Icons.pause : Icons.play_arrow,
+                        color: Colors.white,
+                        size: 30,
                       ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Pomodoro Timer',
-                        style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                      onPressed: () {
+                        if (pomodoroProvider.isRunning) {
+                          pomodoroProvider.pauseTimer();
+                        } else {
+                          pomodoroProvider.startTimer();
+                        }
+                      },
+                    ),
+                    Spacer(),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(
+                        pomodoroProvider.remainingTimeString,
+                        style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
                       ),
-                      SizedBox(height: 10),
-                      Text(
-                        pomodoroProvider.remainingTimeString == '00:00' ? 'Start' : pomodoroProvider.remainingTimeString,
-                        style: TextStyle(color: Colors.white, fontSize: 16),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -68,79 +79,51 @@ class PomodoroTimerWidget extends StatelessWidget {
     );
   }
 
-  void _showDurationPicker(BuildContext context, PomodoroProvider pomodoroProvider) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Select Pomodoro Duration'),
-        content: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _durationButton(context, pomodoroProvider, 5),
-            _durationButton(context, pomodoroProvider, 10),
-            _durationButton(context, pomodoroProvider, 25),
-          ],
+  Widget _durationButton(BuildContext context, PomodoroProvider pomodoroProvider, int minutes) {
+    final bool isSelected = pomodoroProvider.duration.inMinutes == minutes;
+
+    return GestureDetector(
+      onTap: () {
+        if (pomodoroProvider.isRunning) {
+          _showResetDialog(context, pomodoroProvider, minutes);
+        } else {
+          pomodoroProvider.setDuration(Duration(minutes: minutes));
+        }
+      },
+      child: CircleAvatar(
+        radius: 20,
+        backgroundColor: isSelected ? Colors.white : Colors.grey,
+        child: Text(
+          '$minutes',
+          style: TextStyle(
+            color: isSelected ? Colors.black : Colors.black54,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
   }
 
-  Widget _durationButton(BuildContext context, PomodoroProvider pomodoroProvider, int minutes) {
-    return ElevatedButton(
-      onPressed: () {
-        Navigator.of(context).pop();
-        pomodoroProvider.startTimerWithDuration(minutes);
-      },
-      child: Text('$minutes min'),
-    );
-  }
-
-  void _showPauseDialog(BuildContext context, PomodoroProvider pomodoroProvider) {
+  void _showResetDialog(BuildContext context, PomodoroProvider pomodoroProvider, int minutes) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Pomodoro Timer'),
-        content: Text('Timer is running. Would you like to pause or reset the timer?'),
+        content: Text('Timer is running. Would you like to reset the timer to $minutes minutes?'),
         actions: [
           TextButton(
             onPressed: () {
-              pomodoroProvider.pauseTimer();
+              pomodoroProvider.setDuration(Duration(minutes: minutes));
               Navigator.of(context).pop();
             },
-            child: Text('Pause'),
+            child: Text('Yes'),
           ),
           TextButton(
             onPressed: () {
-              pomodoroProvider.resetTimer();
               Navigator.of(context).pop();
             },
-            child: Text('Reset'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showResumeDialog(BuildContext context, PomodoroProvider pomodoroProvider) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Pomodoro Timer'),
-        content: Text('Timer is paused. Would you like to continue or reset the timer?'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              pomodoroProvider.resumeTimer();
-              Navigator.of(context).pop();
-            },
-            child: Text('Continue'),
-          ),
-          TextButton(
-            onPressed: () {
-              pomodoroProvider.resetTimer();
-              Navigator.of(context).pop();
-            },
-            child: Text('Reset'),
+            child: Text('No'),
           ),
         ],
       ),

@@ -30,7 +30,7 @@ class PersistentControls extends StatelessWidget {
               if (currentSongUrl != null)
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.black87,
+                    color: Colors.black87.withOpacity(0.5),
                     borderRadius: BorderRadius.circular(20.0),
                     boxShadow: [
                       BoxShadow(
