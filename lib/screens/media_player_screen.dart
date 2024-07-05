@@ -50,76 +50,76 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
             ),
           ),
           // MediaPlayer content
-          Consumer2<AuthProvider, SongProvider>(
-            builder: (context, authProvider, songProvider, child) {
-              final currentSong = songProvider.currentSong;
-              if (currentSong == null) {
-                return Center(child: CircularProgressIndicator());
-              }
-              return Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      currentSong.title,
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
-                    ),
-                    Text(
-                      currentSong.artist,
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        currentSong.liked ? Icons.favorite : Icons.favorite_border,
-                        color: currentSong.liked ? Colors.red : Colors.grey,
-                      ),
-                      onPressed: () => songProvider.toggleLikeSong(authProvider.user!.id, currentSong),
-                    ),
-                    SizedBox(height: 20),
-                    Slider(
-                      value: mediaPlayerProvider.currentPosition.inSeconds.toDouble(),
-                      max: mediaPlayerProvider.songDuration.inSeconds.toDouble(),
-                      onChanged: mediaPlayerProvider.seek,
-                      activeColor: Colors.black87,
-                      inactiveColor: Colors.white,
-                      thumbColor: Colors.white,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          mediaPlayerProvider.formatDuration(mediaPlayerProvider.currentPosition),
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        Text(
-                          mediaPlayerProvider.formatDuration(mediaPlayerProvider.songDuration),
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.skip_previous),
-                          onPressed: songProvider.playPreviousSong,
-                        ),
-                        IconButton(
-                          icon: Icon(mediaPlayerProvider.isPlaying ? Icons.pause : Icons.play_arrow),
-                          onPressed: mediaPlayerProvider.isPlaying ? mediaPlayerProvider.pauseSong : mediaPlayerProvider.resumeSong,
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.skip_next),
-                          onPressed: songProvider.playNextSong,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+          // Consumer2<AuthProvider, SongProvider>(
+          //   builder: (context, authProvider, songProvider, child) {
+          //     final currentSong = songProvider.currentSong;
+          //     if (currentSong == null) {
+          //       return Center(child: CircularProgressIndicator());
+          //     }
+          //     return Padding(
+          //       padding: const EdgeInsets.all(16.0),
+          //       child: Column(
+          //         mainAxisAlignment: MainAxisAlignment.center,
+          //         children: [
+          //           Text(
+          //             currentSong.title,
+          //             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+          //           ),
+          //           Text(
+          //             currentSong.artist,
+          //             style: TextStyle(color: Colors.white),
+          //           ),
+          //           IconButton(
+          //             icon: Icon(
+          //               currentSong.liked ? Icons.favorite : Icons.favorite_border,
+          //               color: currentSong.liked ? Colors.red : Colors.grey,
+          //             ),
+          //             onPressed: () => songProvider.toggleLikeSong(authProvider.user!.id, currentSong),
+          //           ),
+          //           SizedBox(height: 20),
+          //           Slider(
+          //             value: mediaPlayerProvider.currentPosition.inSeconds.toDouble(),
+          //             max: mediaPlayerProvider.songDuration.inSeconds.toDouble(),
+          //             onChanged: mediaPlayerProvider.seek,
+          //             activeColor: Colors.black87,
+          //             inactiveColor: Colors.white,
+          //             thumbColor: Colors.white,
+          //           ),
+          //           Row(
+          //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //             children: [
+          //               Text(
+          //                 mediaPlayerProvider.formatDuration(mediaPlayerProvider.currentPosition),
+          //                 style: TextStyle(color: Colors.white),
+          //               ),
+          //               Text(
+          //                 mediaPlayerProvider.formatDuration(mediaPlayerProvider.songDuration),
+          //                 style: TextStyle(color: Colors.white),
+          //               ),
+          //             ],
+          //           ),
+          //           Row(
+          //             mainAxisAlignment: MainAxisAlignment.center,
+          //             children: [
+          //               IconButton(
+          //                 icon: Icon(Icons.skip_previous),
+          //                 onPressed: songProvider.playPreviousSong,
+          //               ),
+          //               IconButton(
+          //                 icon: Icon(mediaPlayerProvider.isPlaying ? Icons.pause : Icons.play_arrow),
+          //                 onPressed: mediaPlayerProvider.isPlaying ? mediaPlayerProvider.pauseSong : mediaPlayerProvider.resumeSong,
+          //               ),
+          //               IconButton(
+          //                 icon: Icon(Icons.skip_next),
+          //                 onPressed: songProvider.playNextSong,
+          //               ),
+          //             ],
+          //           ),
+          //         ],
+          //       ),
+          //     );
+          //   },
+          // ),
         ],
       ),
     );
