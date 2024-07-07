@@ -4,7 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ApiClient {
   final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: 'http://localhost:8080',
+      // baseUrl: 'http://localhost:8080',
+      baseUrl:  'https://louderspace-5cc5cf5b293d.herokuapp.com',
       headers: {
         'Content-Type': 'application/json',
       },
