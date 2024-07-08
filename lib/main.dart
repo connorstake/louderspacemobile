@@ -1,4 +1,6 @@
+import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:louderspacemobile/screens/media_player_screen.dart';
 import 'package:louderspacemobile/widgets/persistant_controls.dart';
 import 'package:louderspacemobile/widgets/pomodoro_widget.dart';
@@ -17,8 +19,17 @@ import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/registration_screen.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter binding is initialized
+
+  await JustAudioBackground.init(
+    androidNotificationChannelId: 'com.loudersapce.louderspace.channel.audio',
+    androidNotificationChannelName: 'Audio playback',
+    androidNotificationOngoing: true,
+  );
+
+  final session = await AudioSession.instance;
+  await session.configure(AudioSessionConfiguration.speech());
 
   final apiClient = ApiClient();
   final feedbackService = FeedbackService(apiClient);

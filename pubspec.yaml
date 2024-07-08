@@ -36,8 +36,11 @@ dependencies:
   shared_preferences: ^2.0.6
   logger: ^1.0.0
   audioplayers: ^0.20.1
-  just_audio: ^0.8.0
   rive: ^0.8.4
+  just_audio: ^0.9.17
+  audio_service: ^0.18.0
+  just_audio_background: ^0.0.1-beta.12
+  audio_session: ^0.1.19
 
 
   # The following adds the Cupertino Icons font to your application.
