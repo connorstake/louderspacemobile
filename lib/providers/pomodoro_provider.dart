@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/timezone.dart' as tz;
 import 'media_player_provider.dart';
 
 class PomodoroProvider with ChangeNotifier {
@@ -9,8 +10,9 @@ class PomodoroProvider with ChangeNotifier {
   Duration _remainingTime = Duration(minutes: 25);
   bool _isRunning = false;
   bool _isPaused = false;
+  bool _isZero = false;
   final MediaPlayerProvider mediaPlayerProvider;
-  final AudioPlayer _alarmPlayer = AudioPlayer();
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   PomodoroProvider(this.mediaPlayerProvider);
 
@@ -18,6 +20,7 @@ class PomodoroProvider with ChangeNotifier {
   Duration get remainingTime => _remainingTime;
   bool get isRunning => _isRunning;
   bool get isPaused => _isPaused;
+  bool get isZero => _isZero;
 
   String get remainingTimeString {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
@@ -30,13 +33,18 @@ class PomodoroProvider with ChangeNotifier {
     pauseTimer();
     _duration = duration;
     _remainingTime = duration;
+    _isZero = false;
     notifyListeners();
   }
 
   void startTimer() {
     if (_isRunning) return;
+    if (_isZero) {
+      resetTimer();
+    }
     _isRunning = true;
     _isPaused = false;
+    notifyListeners();
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (_remainingTime.inSeconds > 0) {
         _remainingTime -= Duration(seconds: 1);
@@ -45,8 +53,9 @@ class PomodoroProvider with ChangeNotifier {
         _timer?.cancel();
         _isRunning = false;
         _isPaused = false;
+        _isZero = true;
         notifyListeners();
-        _playAlarm();
+        _scheduleAlarm();
       }
     });
   }
@@ -63,6 +72,7 @@ class PomodoroProvider with ChangeNotifier {
     _remainingTime = _duration; // Reset to default duration
     _isRunning = false;
     _isPaused = false;
+    _isZero = false;
     notifyListeners();
   }
 
@@ -72,20 +82,37 @@ class PomodoroProvider with ChangeNotifier {
     }
   }
 
-  Future<void> _playAlarm() async {
+  Future<void> _scheduleAlarm() async {
     await mediaPlayerProvider.pauseSong(); // Pause the music
-    int result = await _alarmPlayer.play('https://cdn.pixabay.com/download/audio/2022/06/12/audio_eb85589880.mp3?filename=oversimplified-alarm-clock-113180.mp3', volume: 0.5);
-    if (result == 1) {
-      // success
-      print("Alarm started playing successfully.");
-    } else {
-      // failure
-      print("Failed to play alarm.");
-    }
+
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      0,
+      'Pomodoro Complete',
+      'The Pomodoro session has ended.',
+      tz.TZDateTime.now(tz.local).add(Duration(seconds: 5)), // Schedule to ring in 5 seconds for testing
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'pomodoro_channel',
+          'Pomodoro Notifications',
+          importance: Importance.max,
+          priority: Priority.high,
+          playSound: true,
+          // Use the default notification sound
+          sound: RawResourceAndroidNotificationSound('default'),
+        ),
+        iOS: IOSNotificationDetails(
+          // Use the default notification sound
+          presentSound: true,
+        ),
+      ),
+      androidAllowWhileIdle: true,
+      uiLocalNotificationDateInterpretation:
+      UILocalNotificationDateInterpretation.absoluteTime,
+    );
   }
 
   void stopAlarm() {
-    _alarmPlayer.stop();
+    flutterLocalNotificationsPlugin.cancel(0);
     if (mediaPlayerProvider.isPlaying) {
       mediaPlayerProvider.resumeSong();
     }
@@ -111,8 +138,7 @@ class PomodoroProvider with ChangeNotifier {
       },
     ).then((_) {
       // Ensure the music does not resume if the dialog is dismissed
-      _alarmPlayer.stop();
-      mediaPlayerProvider.pauseSong();
+      stopAlarm();
     });
   }
 }

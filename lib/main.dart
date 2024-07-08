@@ -1,5 +1,6 @@
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:louderspacemobile/screens/media_player_screen.dart';
 import 'package:louderspacemobile/widgets/persistant_controls.dart';
@@ -18,8 +19,13 @@ import 'services/station_service.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/registration_screen.dart';
+import 'package:timezone/data/latest.dart' as tz;
+
+
+FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
 void main() async {
+
   WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter binding is initialized
 
   await JustAudioBackground.init(
@@ -30,6 +36,25 @@ void main() async {
 
   final session = await AudioSession.instance;
   await session.configure(AudioSessionConfiguration.speech());
+
+  const AndroidInitializationSettings initializationSettingsAndroid =
+  AndroidInitializationSettings('app_icon');
+
+  const IOSInitializationSettings initializationSettingsIOS =
+  IOSInitializationSettings(
+    requestAlertPermission: true,
+    requestBadgePermission: true,
+    requestSoundPermission: true,
+  );
+
+  const InitializationSettings initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+    iOS: initializationSettingsIOS,
+  );
+
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
+  tz.initializeTimeZones();
 
   final apiClient = ApiClient();
   final feedbackService = FeedbackService(apiClient);
