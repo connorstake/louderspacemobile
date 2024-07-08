@@ -37,6 +37,7 @@ class PomodoroProvider with ChangeNotifier {
     if (_isRunning) return;
     _isRunning = true;
     _isPaused = false;
+    notifyListeners();
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (_remainingTime.inSeconds > 0) {
         _remainingTime -= Duration(seconds: 1);

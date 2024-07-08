@@ -84,7 +84,7 @@ class PomodoroTimerWidget extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        if (pomodoroProvider.isRunning) {
+        if (pomodoroProvider.isRunning || pomodoroProvider.isPaused && pomodoroProvider.remainingTime < pomodoroProvider.duration) {
           _showResetDialog(context, pomodoroProvider, minutes);
         } else {
           pomodoroProvider.setDuration(Duration(minutes: minutes));
