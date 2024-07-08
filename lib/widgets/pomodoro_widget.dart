@@ -39,7 +39,7 @@ class PomodoroTimerWidget extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        _durationButton(context, pomodoroProvider, 1),
+                        _durationButton(context, pomodoroProvider, 5),
                         SizedBox(width: 5),
                         _durationButton(context, pomodoroProvider, 10),
                         SizedBox(width: 5),
