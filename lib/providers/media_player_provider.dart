@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'song_provider.dart';
 
 class MediaPlayerProvider with ChangeNotifier {
@@ -14,23 +15,22 @@ class MediaPlayerProvider with ChangeNotifier {
   int? _stationId;
 
   MediaPlayerProvider() {
-    _audioPlayer.onPlayerStateChanged.listen((PlayerState state) {
-      _isPlaying = state == PlayerState.PLAYING;
-      notifyListeners();
-    });
-
-    _audioPlayer.onDurationChanged.listen((duration) {
-      _songDuration = duration;
-      notifyListeners();
-    });
-
-    _audioPlayer.onAudioPositionChanged.listen((position) {
+    _audioPlayer.positionStream.listen((position) {
       _currentPosition = position;
       notifyListeners();
     });
 
-    _audioPlayer.onPlayerCompletion.listen((event) {
-      playNextSong();
+    _audioPlayer.durationStream.listen((duration) {
+      _songDuration = duration ?? Duration.zero;
+      notifyListeners();
+    });
+
+    _audioPlayer.playerStateStream.listen((playerState) {
+      _isPlaying = playerState.playing;
+      if (playerState.processingState == ProcessingState.completed) {
+        playNextSong();
+      }
+      notifyListeners();
     });
   }
 
@@ -56,27 +56,35 @@ class MediaPlayerProvider with ChangeNotifier {
 
   Future<void> playSong(String url) async {
     _currentSongUrl = url;
-    int result = await _audioPlayer.play(url);
-    if (result == 1) {
+    try {
+      await _audioPlayer.setAudioSource(AudioSource.uri(
+        Uri.parse(url),
+        tag: MediaItem(
+          id: url,
+          album: "Album",
+          title: _songProvider?.currentSong?.title ?? "Title",
+          artist: _songProvider?.currentSong?.artist ?? "Artist",
+          artUri: Uri.parse("https://example.com/album.jpg"),
+        ),
+      ));
+      await _audioPlayer.play();
       _isPlaying = true;
       notifyListeners();
+    } catch (e) {
+      print('Error playing song: $e');
     }
   }
 
   Future<void> pauseSong() async {
-    int result = await _audioPlayer.pause();
-    if (result == 1) {
-      _isPlaying = false;
-      notifyListeners();
-    }
+    await _audioPlayer.pause();
+    _isPlaying = false;
+    notifyListeners();
   }
 
   Future<void> resumeSong() async {
-    int result = await _audioPlayer.resume();
-    if (result == 1) {
-      _isPlaying = true;
-      notifyListeners();
-    }
+    await _audioPlayer.play();
+    _isPlaying = true;
+    notifyListeners();
   }
 
   void playNextSong() {

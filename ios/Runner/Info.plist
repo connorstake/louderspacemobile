@@ -43,5 +43,7 @@
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
+	<key>NSMicrophoneUsageDescription</key>
+    <string>We need access to your microphone for recording audio.</string>
 </dict>
 </plist>
