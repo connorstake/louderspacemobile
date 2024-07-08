@@ -39,7 +39,7 @@ class PomodoroTimerWidget extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        _durationButton(context, pomodoroProvider, 5),
+                        _durationButton(context, pomodoroProvider, 1),
                         SizedBox(width: 5),
                         _durationButton(context, pomodoroProvider, 10),
                         SizedBox(width: 5),
@@ -64,9 +64,17 @@ class PomodoroTimerWidget extends StatelessWidget {
                     Spacer(),
                     Container(
                       alignment: Alignment.center,
-                      child: Text(
-                        pomodoroProvider.remainingTimeString,
-                        style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
+                      child: AnimatedSwitcher(
+                        duration: Duration(milliseconds: 500),
+                        child: Text(
+                          pomodoroProvider.remainingTimeString,
+                          key: ValueKey(pomodoroProvider.remainingTimeString),
+                          style: TextStyle(
+                            color: pomodoroProvider.isZero ? Colors.red : Colors.white,
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -84,7 +92,7 @@ class PomodoroTimerWidget extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        if (pomodoroProvider.isRunning || pomodoroProvider.isPaused && pomodoroProvider.remainingTime < pomodoroProvider.duration) {
+        if (pomodoroProvider.isRunning || (pomodoroProvider.isPaused && pomodoroProvider.remainingTime < pomodoroProvider.duration)) {
           _showResetDialog(context, pomodoroProvider, minutes);
         } else {
           pomodoroProvider.setDuration(Duration(minutes: minutes));

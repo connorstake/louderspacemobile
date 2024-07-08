@@ -41,6 +41,8 @@ dependencies:
   audio_service: ^0.18.0
   just_audio_background: ^0.0.1-beta.12
   audio_session: ^0.1.19
+  flutter_local_notifications: ^9.0.0+1
+  timezone: ^0.8.0
 
 
   # The following adds the Cupertino Icons font to your application.
